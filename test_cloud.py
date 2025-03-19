@@ -2,7 +2,7 @@ import time
 import uiautomator2 as u2
 from datetime import datetime
 import logging
-import os
+from hykb_interface import HykbUtils
 
 class TestCloud:
 
@@ -10,6 +10,7 @@ class TestCloud:
         """
             类初始化函数
         """
+<<<<<<< HEAD
         self.d = u2.connect("")
         # 创建截图保存目录
         os.makedirs("error_screenshots", exist_ok=True)
@@ -155,6 +156,10 @@ class TestCloud:
         except Exception as e:
             logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 启动云游戏过程发生异常: {str(e)}")
             return False
+=======
+        self.hykb = HykbUtils("5bf8ee8e")
+        self.d = self.hykb.d
+>>>>>>> 38bd6c5af27bfab4ed8cce0cf16e925dcf77ef65
 
     def test_cloud_game(self):
         try:
@@ -163,50 +168,32 @@ class TestCloud:
             # 处理启动弹窗
             start_time = time.time()
             while time.time() - start_time < 30:
-                self.handle_popups()
+                self.hykb.handle_popups()
                 time.sleep(1)
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 启动完成，弹窗处理结束")
-            time.sleep(2)  
-
             #调用登录函数
-            self.login()
-            time.sleep(3)
-
+            self.hykb.login()
             # 点击进入我的收藏
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 点击进入我的收藏")
             self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/core_function_view"]/androidx.recyclerview.widget.RecyclerView[1]/android.view.ViewGroup[3]/android.widget.ImageView[1]').click()
             time.sleep(2)
             #调用云玩启动函数
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《原神》S6线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[1]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            self.hykb.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[1]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《王者荣耀》S7线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[2]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            self.hykb.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[2]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《蛋仔派对》S1线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[3]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            self.hykb.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[3]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试端游《骑马与砍杀》S4_20线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[4]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            self.hykb.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[4]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试页游《黄金矿工-页游》S4_1线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            self.hykb.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
         
         finally:
             # 清理数据
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 开始清除应用数据...")
-            try:
-                # 先停止应用
-                self.d.app_stop("com.xmcy.hykb")
-                time.sleep(2)
-                # 尝试清除数据
-                self.d.app_clear("com.xmcy.hykb")
-                logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 应用数据已清除")
-            except Exception as e:
-                logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 清除应用数据失败: {str(e)}")
-                # 尝试使用 shell 命令清除
-                try:
-                    self.d.shell(['pm', 'clear', 'com.xmcy.hykb'])
-                    logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 通过shell命令清除应用数据成功")
-                except Exception as e:
-                    logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] shell命令清除应用数据也失败: {str(e)}")
+            self.hykb.clean_app_data("com.xmcy.hykb")
+
