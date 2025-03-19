@@ -36,6 +36,7 @@ class TestCloud:
         if self.d.xpath('//android.widget.FrameLayout[2]').exists:
             self.d.click(0.905, 0.966)
 
+
     def login(self):
         """
         执行登录操作
@@ -103,57 +104,44 @@ class TestCloud:
             return False
     
 
-    def start_cloud_game(self, game_element):
+    def start_fast_game(self, game_element):
         """
-        启动云游戏并进行游戏测试
+        启动快玩并进行游戏测试
         Args:
             game_element: 游戏元素的xpath对象
         Returns:
-            bool: 云游戏是否启动成功
+            bool: 快玩是否启动成功
         """
         try:
             # 点击云游戏
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 点击云玩启动按钮...")
+            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 点击快玩按钮...")
             game_element.click()
             time.sleep(2)
             # 处理可能遇到的温馨提示弹窗
-            if self.d(resourceId="com.xmcy.hykb:id/left_button").exists:
-                self.d(resourceId="com.xmcy.hykb:id/left_button").click()
+            if self.d(text="不再提醒").exists:
+                self.d(text="不再提醒").click()
             if self.d.xpath('//*[@resource-id="android:id/content"]/android.widget.LinearLayout[1]/android.widget.LinearLayout[3]').exists:
                 self.d.xpath('//*[@resource-id="android:id/content"]/android.widget.LinearLayout[1]/android.widget.LinearLayout[3]').click()
-            # 等待插件加载并启动游戏
-            if self.d(resourceId="com.xmcy.hykb:id/cloud_game_start_tv").wait(timeout=120):
-                logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 插件加载成功，开始启动游戏")
+            # 检测快玩侧边悬浮球出现来判断是否进入快玩成功
+            if (self.d.xpath('//android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.RelativeLayout[1]')):
+                logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 快玩加载成功，成功进入游戏")
                 time.sleep(2)
-                # 点击开始云玩
-                self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/cloud_game_start_tv"]').click()
-                logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 点击开始云玩")
-                # 检测边玩边下按钮/云玩顶部带宽延迟元素判断是否进入云玩成功
-                if (self.d(resourceId="com.hykb.yuanshenmap:id/ping_view").wait(timeout=120) or 
-                    self.d(resourceId="com.hykb.yuanshenmap:id/tv_download_btw").wait(timeout=120)):
-                    logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 成功进入云玩")
-                    time.sleep(2)
-                    # 使用系统返回按钮退出
-                    self.d.press("back")
-                    time.sleep(1)
-                    self.d(resourceId="com.hykb.yuanshenmap:id/cloud_game_dialog_right_tv").click()
-                    logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 游戏已退出")
-                    return True
-                else:
-                    # 添加截图
-                    screenshot_time = datetime.now().strftime('%Y%m%d_%H%M%S')
-                    self.d.screenshot(f"error_screenshots/cloud_game_fail_{screenshot_time}进入云玩失败.png")
-                    logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 进入云玩失败")
-                    return False
+                
+                # 使用悬浮球退出
+                self.d.xpath('//android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.RelativeLayout[1]').click()
+                self.d.xpath('//android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.FrameLayout[1]/android.widget.RelativeLayout[1]/android.widget.LinearLayout[1]/android.widget.LinearLayout[2]').click()
+                self.d.xpath('//*[@text="退出游戏"]').click()
+                logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 游戏已退出")
+                return True
             else:
                 # 添加截图
                 screenshot_time = datetime.now().strftime('%Y%m%d_%H%M%S')
-                self.d.screenshot(f"error_screenshots/cloud_game_fail_{screenshot_time}插件加载失败.png")
-                logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 插件加载失败")
+                self.d.screenshot(f"error_screenshots/cloud_game_fail_{screenshot_time}进入快玩失败.png")
+                logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 进入快玩失败")
                 return False
                 
         except Exception as e:
-            logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 启动云游戏过程发生异常: {str(e)}")
+            logging.error(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 启动快玩过程发生异常: {str(e)}")
             return False
 
     def test_cloud_game(self):
@@ -169,28 +157,30 @@ class TestCloud:
             time.sleep(2)  
 
             #调用登录函数
-            self.login()
-            time.sleep(3)
+            #self.login()
+            #time.sleep(3)
+
+            """不包含登录操作，先手动登录完测试"""
+
+            # 点击进入我的
+            self.d.xpath('//*[@resource-id="android:id/tabs"]/android.widget.FrameLayout[5]').click()
+            time.sleep(1)
 
             # 点击进入我的收藏
             logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 点击进入我的收藏")
             self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/core_function_view"]/androidx.recyclerview.widget.RecyclerView[1]/android.view.ViewGroup[3]/android.widget.ImageView[1]').click()
             time.sleep(2)
+
             #调用云玩启动函数
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《原神》S6线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[1]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试64位快玩-云·逆水寒")
+            self.start_fast_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[1]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《王者荣耀》S7线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[2]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试32/64位快玩-云·原神")
+            self.start_fast_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[2]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试手游《蛋仔派对》S1线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[3]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
+            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试32位快玩-沙威玛传奇")
+            self.start_fast_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[3]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
             time.sleep(3)
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试端游《骑马与砍杀》S4_20线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[4]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
-            time.sleep(3)
-            logging.info(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 测试页游《黄金矿工-页游》S4_1线路")
-            self.start_cloud_game(self.d.xpath('//*[@resource-id="com.xmcy.hykb:id/item_collect_game_union_rlview"]/android.widget.LinearLayout[5]/android.widget.RelativeLayout[1]/android.widget.FrameLayout[1]'))
         
         finally:
             # 清理数据
