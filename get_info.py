@@ -8,17 +8,14 @@ class GetInfo:
         super().__init__()
 
         self.level = "level-4"
-        self.dev = True
-        #self.dev = False  # False OT
+        #self.dev = True
+        self.dev = False  # False OT
 
         self.dev_web_host = "https://dev.admin.newsapp.5054399.com"
         self.dev_web_cookie = {"PHPSESSID": "9l4rr9un2eet2u15vn7ji03k32"}
         self.ot_web_host = "http://ot.admin.newsapp.5054399.com"
-        self.ot_web_cookie = {"PHPSESSID": "ol0l5edok1kgn8vdhshn11acs3"}
-        # 5566  设备
-        self.header = {
-            "User-Agent": "Androidkb/1.5.7.507(android;auto;7.1.2;1080x1920;WiFi);at"
-        }
+        self.ot_web_cookie = {"PHPSESSID": "sjqp64ft1r5edg75m5ma6nk5o0"}
+
         if self.dev:
             self.web_host = self.dev_web_host
             self.web_cookie = self.dev_web_cookie
@@ -61,24 +58,32 @@ class GetInfo:
                 selectors = {
                     'type': ('input[name="fast_game_type"][checked]', 'value', '位数'),
                     'level': ('input[name="fast_level"][checked="true"]', 'value', '等级'),
-                   'status': ('select[name="fast_status"] option[selected="selected"]', 'text', '状态'),
+                    'status': ('select[name="fast_status"] option[selected="selected"]', 'text', '状态'),
                     'priority': ('input[name="fast_priority_show"][checked]', 'value', '是否优先')
                 }
-                for key, (selector, attr_type, label) in selectors.items():
-                    elements = soup.select(selector)
-                    if elements:
-                        value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
-                        if key == 'priority':
-                            value = "是" if value == "1" else "否"
-                        elif key == 'type':
-                            type_map = {
-                                "1": "32位",
-                                "2": "32位/64位",
-                                "3": "64位"
-                            }
-                            value = type_map.get(str(value), str(value))
-                        print(f"快玩--{label}: {value}")
-                print(f"================================================")
+                
+                # 检查快玩状态
+                fast_status = soup.select('select[name="fast_status"] option[selected="selected"]')
+                if not fast_status or fast_status[0].text.strip() != "上架":
+                    print("快玩未上架")
+                    
+                # 如果已上架，显示详细信息
+                else:
+                    for key, (selector, attr_type, label) in selectors.items():
+                        elements = soup.select(selector)
+                        if elements:
+                            value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
+                            if key == 'priority':
+                                value = "是" if value == "1" else "否"
+                            elif key == 'type':
+                                type_map = {
+                                    "1": "32位",
+                                    "2": "32位/64位",
+                                    "3": "64位"
+                                }
+                                value = type_map.get(str(value), str(value))
+                            print(f"快玩--{label}: {value}")
+                print("================================================")
                     
                 print(f"==============开始查询小游戏信息：==============")
                 # 查找小游戏相关信息
@@ -88,13 +93,21 @@ class GetInfo:
                     'status': ('select[name="mini_status"] option[selected="selected"]', 'text', '状态'),
                     'priority': ('input[name="mini_priority_show"][checked]', 'value', '是否优先')
                 }
-                for key, (selector, attr_type, label) in selectors.items():
-                    elements = soup.select(selector)
-                    if elements:
-                        value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
-                        if key == 'priority':
-                            value = "是" if value == "1" else "否"
-                        print(f"小游戏--{label}: {value}")
+                
+                # 检查小游戏状态
+                mini_status = soup.select('select[name="mini_status"] option[selected="selected"]')
+                if not mini_status or mini_status[0].text.strip() != "上架":
+                    print("小游戏未上架")
+                
+                # 如果已上架，显示详细信息
+                else:
+                    for key, (selector, attr_type, label) in selectors.items():
+                        elements = soup.select(selector)
+                        if elements:
+                            value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
+                            if key == 'priority':
+                                value = "是" if value == "1" else "否"
+                            print(f"小游戏--{label}: {value}")
                 print(f"================================================")
 
                 print(f"===============开始查询云玩信息：=============== ")
@@ -105,13 +118,20 @@ class GetInfo:
                     'priority': ('input[name="mini_priority_show"][checked]', 'value', '是否优先')
                 }
                 
-                for key, (selector, attr_type, label) in selectors.items():
-                    elements = soup.select(selector)
-                    if elements:
-                        value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
-                        if key == 'priority':
-                            value = "是" if value == "1" else "否"
-                        print(f"云玩--{label}: {value}")
+                # 检查云玩状态
+                cloud_status = soup.select('select[name="cloud_status"] option[selected="selected"]')
+                if not cloud_status or cloud_status[0].text.strip() != "上架":
+                    print("云玩未上架")
+                
+                # 如果已上架，显示详细信息
+                else:
+                    for key, (selector, attr_type, label) in selectors.items():
+                        elements = soup.select(selector)
+                        if elements:
+                            value = elements[0].text.strip() if attr_type == 'text' else elements[0].get('value', '')
+                            if key == 'priority':
+                                value = "是" if value == "1" else "否"
+                            print(f"云玩--{label}: {value}")
                 
                 # 查找云玩各个线路容器、LEVEL、线路名称、线路类型、线路状态
                 containers = soup.select('input[name="ext_cloud_line[container][]"]')
@@ -149,7 +169,7 @@ class GetInfo:
                     
                     if line_info:
                         print(' | '.join(line_info))
-                        
+
                 print(f"================================================")
 
         except Exception as e:
@@ -158,6 +178,6 @@ class GetInfo:
 
 
 if __name__ == '__main__':
-    info = GetInfo()  # 创建实例
-    test = info.get_web_game_detail(118904)  # 调用方法
+    info = GetInfo()
+    test = info.get_web_game_detail(181084)
     print(test)
